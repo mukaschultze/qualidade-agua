@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import * as geolib from 'geolib';
 import { EMPTY, forkJoin, from, Observable } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
 import type * as initSqlJsTypes from 'sql.js';
@@ -38,5 +39,37 @@ export class DatabaseService {
 
   runSql(sql: string) {
     return this.db$.pipe(map((bd) => bd.exec(sql)));
+  }
+
+  convertLat(lat: any) {
+    const sanitized = !isNaN(+lat!)
+      ? +lat!
+      : (lat as string).replace(
+          /(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
+          '$1°$2\'$3.$50"S'
+        );
+
+    try {
+      return geolib.toDecimal(sanitized);
+    } catch (err) {
+      console.error(`FAILED TO CONVERT LAT ${sanitized} (${lat})`, err);
+      return 0;
+    }
+  }
+
+  convertLon(lon: any) {
+    const sanitized = !isNaN(+lon!)
+      ? +lon!
+      : (lon as string).replace(
+          /(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
+          '$1°$2\'$3.$50"O'
+        );
+
+    try {
+      return geolib.toDecimal(sanitized);
+    } catch (err) {
+      console.error(`FAILED TO CONVERT LON ${sanitized} (${lon})`, err);
+      return 0;
+    }
   }
 }
