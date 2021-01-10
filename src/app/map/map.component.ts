@@ -1,5 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { circle, latLng, marker, polygon, tileLayer } from 'leaflet';
+import { Data } from '@angular/router';
+import { Circle, circle, latLng, marker, polygon, tileLayer } from 'leaflet';
+import { DbService } from '../db.service';
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
@@ -7,6 +9,8 @@ import { circle, latLng, marker, polygon, tileLayer } from 'leaflet';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MapComponent implements OnInit {
+
+  data: Array<Data> = [];
 
   options = {
     layers: [
@@ -16,45 +20,9 @@ export class MapComponent implements OnInit {
     center: latLng(-29.49944444, -52.51527778)
   };
 
+  teste = [];
 
-  layers = [
-    circle([-29.49944444, -52.51527778], {
-      radius: 5000,
-      color: "blue",
-      fillOpacity: 0.1
-    }).bindPopup(
-      '<label><b>Nome:</b> ' + 'Barros Cassal</label><br>' +
-      '<b><label> Última coleta: </b>' + '2009' + '<br>' +
-      '<label><b>Alcalinidade de bicarbonatos:</b> ' + '22,40' + ' (CaCO3) ' + '</label><br>' +
-      '<label><b>Alcalinidade de bicarbonatos:</b> ' + '<0,1' + ' (CaCO3) ' + '</label><br>' +
-      '<label><b>Alcalinidade de bicarbonatos:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Alcalinidade total:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Alumínio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Cálcio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Coliformes termotolerantes:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Coliformes totais:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Cloro residual livre:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Condutividade elétrica:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Ferro:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Fluoreto:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Magnésio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Manganês:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Matéria orgânica:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Nitrato:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Nitrogênio amoniacal:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>pH:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Potássio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Salinidade:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Sólidos dissolvidos totais:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Sódio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Sulfato:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
-      '<label><b>Turbidez:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' 
-    ),
-    // polygon([[ 46.8, -121.85 ], [ 46.92, -121.92 ], [ 46.87, -121.8 ]]),
-    // marker([ -29.49944444, -52.51527778 ], {
-
-    // })
-  ];
+  layers = this.teste;
 
   pointMouseover(leafletEvent: any): any {
     console.log(leafletEvent);
@@ -67,9 +35,57 @@ export class MapComponent implements OnInit {
     });
   }
 
-  constructor() { }
+  createLayers(): void {
+    this.layers.push()
+
+    var circles = [
+      circle([-29.49944444, -52.51527778], {
+        radius: 5000,
+        color: "blue",
+        fillOpacity: 0.1
+      }).bindPopup(
+        '<label><b>Nome:</b> ' + 'Barros Cassal</label><br>' +
+        '<b><label> Última coleta: </b>' + '2009' + '<br>' +
+        '<label><b>Alcalinidade de bicarbonatos:</b> ' + '22,40' + ' (CaCO3) ' + '</label><br>' +
+        '<label><b>Alcalinidade de bicarbonatos:</b> ' + '<0,1' + ' (CaCO3) ' + '</label><br>' +
+        '<label><b>Alcalinidade de bicarbonatos:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Alcalinidade total:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Alumínio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Cálcio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Coliformes termotolerantes:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Coliformes totais:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Cloro residual livre:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Condutividade elétrica:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Ferro:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Fluoreto:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Magnésio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Manganês:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Matéria orgânica:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Nitrato:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Nitrogênio amoniacal:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>pH:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Potássio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Salinidade:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Sólidos dissolvidos totais:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Sódio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Sulfato:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+        '<label><b>Turbidez:</b> ' + '<0,1' + ' mg/L ' + '</label><br>'
+      ),
+      // polygon([[ 46.8, -121.85 ], [ 46.92, -121.92 ], [ 46.87, -121.8 ]]),
+      // marker([ -29.49944444, -52.51527778 ], {
+
+      // })
+    ]
+  }
+
+  constructor(
+    private dbService: DbService
+  ) { }
 
   ngOnInit(): void {
+    this.dbService.getData().subscribe((data) => {
+
+    });
   }
 
 }

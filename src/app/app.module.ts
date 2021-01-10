@@ -18,6 +18,7 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
+    HttpClientModule,
     ReactiveFormsModule,
     LeafletModule,
     HttpClientModule,

@@ -5,6 +5,7 @@ export interface Data{
     long: number;
     update: string;
     altitude: number;
+    data: Array<qualidade>
 
 }
 
