@@ -9,8 +9,8 @@ initSqlJs = (window as any).initSqlJs as typeof initSqlJsTypes;
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseService {
-  sql$: Observable<SqlJs.SqlJsStatic>;
-  db$: Observable<SqlJs.Database>;
+  private sql$: Observable<SqlJs.SqlJsStatic>;
+  private db$: Observable<SqlJs.Database>;
 
   constructor(private http: HttpClient) {
     this.sql$ = from(
