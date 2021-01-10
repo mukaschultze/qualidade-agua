@@ -21,6 +21,7 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
     HttpClientModule,
     ReactiveFormsModule,
     LeafletModule,
+    HttpClientModule,
 
     // MATERIAL
     MatToolbarModule,
