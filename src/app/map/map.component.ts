@@ -16,7 +16,6 @@ export class MapComponent implements OnInit {
     center: latLng(-29.49944444, -52.51527778)
   };
 
-  teste = "bacia1"
 
   layers = [
     circle([-29.49944444, -52.51527778], {
@@ -27,8 +26,29 @@ export class MapComponent implements OnInit {
       '<label><b>Nome:</b> ' + 'Barros Cassal</label><br>' +
       '<b><label> Última coleta: </b>' + '2009' + '<br>' +
       '<label><b>Alcalinidade de bicarbonatos:</b> ' + '22,40' + ' (CaCO3) ' + '</label><br>' +
-      '<label><b>Alcalinidade de bicarbonatos:</b> ' + '<0,1' + ' (CaCO3) ' + '</label>' +
-      '<label><b>Alcalinidade de bicarbonatos:</b> ' + '<0,1' + ' mg/L ' + '</label>' 
+      '<label><b>Alcalinidade de bicarbonatos:</b> ' + '<0,1' + ' (CaCO3) ' + '</label><br>' +
+      '<label><b>Alcalinidade de bicarbonatos:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Alcalinidade total:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Alumínio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Cálcio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Coliformes termotolerantes:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Coliformes totais:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Cloro residual livre:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Condutividade elétrica:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Ferro:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Fluoreto:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Magnésio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Manganês:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Matéria orgânica:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Nitrato:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Nitrogênio amoniacal:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>pH:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Potássio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Salinidade:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Sólidos dissolvidos totais:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Sódio:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Sulfato:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' +
+      '<label><b>Turbidez:</b> ' + '<0,1' + ' mg/L ' + '</label><br>' 
     ),
     // polygon([[ 46.8, -121.85 ], [ 46.92, -121.92 ], [ 46.87, -121.8 ]]),
     // marker([ -29.49944444, -52.51527778 ], {
