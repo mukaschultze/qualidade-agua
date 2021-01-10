@@ -45,31 +45,21 @@ export class DatabaseService {
     const sanitized = !isNaN(+lat!)
       ? +lat!
       : (lat as string).replace(
-          /(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
+          /.+?(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
           '$1°$2\'$3.$50"S'
         );
 
-    try {
-      return geolib.toDecimal(sanitized);
-    } catch (err) {
-      console.error(`FAILED TO CONVERT LAT ${sanitized} (${lat})`, err);
-      return 0;
-    }
+    return geolib.toDecimal(sanitized);
   }
 
   convertLon(lon: any) {
     const sanitized = !isNaN(+lon!)
       ? +lon!
       : (lon as string).replace(
-          /(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
+          /.+?(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
           '$1°$2\'$3.$50"O'
         );
 
-    try {
-      return geolib.toDecimal(sanitized);
-    } catch (err) {
-      console.error(`FAILED TO CONVERT LON ${sanitized} (${lon})`, err);
-      return 0;
-    }
+    return geolib.toDecimal(sanitized);
   }
 }
