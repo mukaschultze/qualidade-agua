@@ -34,13 +34,6 @@ export class DatabaseService {
         return EMPTY;
       })
     );
-
-    this.runSql('SELECT * FROM dados_coletados').subscribe((a) =>
-      console.log(a[0])
-    );
-
-    //.pipe(([sqlite, sqljs] )=> new sqljs.);
-    //this.sql$.pipe(map((s) => new s.Database()));
   }
 
   runSql(sql: string) {
