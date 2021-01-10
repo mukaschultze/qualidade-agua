@@ -6,91 +6,115 @@ import { DatabaseService } from './database.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-
 export class AppComponent {
   constructor(private database: DatabaseService) {
-    this.database
-      .runSql('SELECT * FROM dados_coletados')
-      .subscribe((a) => {
-        const data = a;
-        const arrayJson = [];
-        let first = true;
-        let notEnd = false;
-        let j = 0;
+    this.database.runSql('SELECT * FROM dados_coletados').subscribe((a) => {
+      // MAGIA NEGRA DO JS
+      const obj = a.map((table) =>
+        table.values.map((row) =>
+          table.columns
+            .map((colName, idx) => ({ [colName]: row[idx] }))
+            .reduce((acc, cur) => ({ ...acc, ...cur }), {})
+        )
+      )[0];
 
-        for (let i = 0; i < data[0].values.length ; i++) {
-          // 1: Bacia / 2: Município / 3:latitude_s / 4:"longitude_o" / 5:coordenadas_utm_e / 6: coordenadas_utm_n / 16: data_coleta
-          if (i !== data[0].values.length - 1) {
-            if ((data[0].values[i][1] === data[0].values[i + 1][1]) && (data[0].values[i][2] === data[0].values[i + 1][2])
-              && (data[0].values[i][3] === data[0].values[i + 1][3]) && (data[0].values[i][4] === data[0].values[i + 1][4])
-              && (data[0].values[i][5] === data[0].values[i + 1][5]) && (data[0].values[i][6] === data[0].values[i + 1][6])
-              && (data[0].values[i][16] === data[0].values[i + 1][16]) && first) {
-              arrayJson.push({
-                bacia: data[0].values[i][1],
-                municipio: data[0].values[i][2],
-                lat: data[0].values[i][3],
-                long: data[0].values[i][4],
-                update: data[0].values[i][16],
-                altitude: data[0].values[i][7],
-                data: [{
-                  parametro_conforme_artigo: data[0].values[i][9],
-                  valor: data[0].values[i][11],
-                  unidade: data[0].values[i][13]
-                }]
-              });
-              j++;
-              first = false;
-              notEnd = true;
+      const arrayJson = [];
+      let first = true;
+      let notEnd = false;
+      let j = 0;
 
-            } else if (((data[0].values[i][1] === data[0].values[i + 1][1]) && (data[0].values[i][2] === data[0].values[i + 1][2])
-              && (data[0].values[i][3] === data[0].values[i + 1][3]) && (data[0].values[i][4] === data[0].values[i + 1][4])
-              && (data[0].values[i][5] === data[0].values[i + 1][5]) && (data[0].values[i][6] === data[0].values[i + 1][6])
-              && (data[0].values[i][16] === data[0].values[i + 1][16]) && !first) ) {
-              arrayJson[j - 1].data.push({
-                parametro_conforme_artigo: data[0].values[i][9],
-                valor: data[0].values[i][11],
-                unidade: data[0].values[i][13]
-              });
-            } else {
-              arrayJson[j - 1].data.push({
-                parametro_conforme_artigo: data[0].values[i][9],
-                valor: data[0].values[i][11],
-                unidade: data[0].values[i][13]
-              });
-              notEnd = false;
-              first = true;
-            }
+      for (let i = 0; i < obj.length; i++) {
+        if (i !== obj.length - 1) {
+          if (
+            obj[i]['bacia'] === obj[i + 1]['bacia'] &&
+            obj[i]['municipio'] === obj[i + 1]['municipio'] &&
+            obj[i]['latitude_s'] === obj[i + 1]['latitude_s'] &&
+            obj[i]['longitude_o'] === obj[i + 1]['longitude_o'] &&
+            obj[i]['coordenadas_utm_e'] === obj[i + 1]['coordenadas_utm_e'] &&
+            obj[i]['coordenadas_utm_n'] === obj[i + 1]['coordenadas_utm_n'] &&
+            obj[i]['data_coleta'] === obj[i + 1]['data_coleta'] &&
+            first
+          ) {
+            arrayJson.push({
+              bacia: obj[i]['bacia'],
+              municipio: obj[i]['municipio'],
+              lat: obj[i]['latitude_s'],
+              long: obj[i]['longitude_o'],
+              update: obj[i]['data_coleta'],
+              altitude: obj[i]['altitude_m'],
+              data: [
+                {
+                  parametro_conforme_artigo:
+                    obj[i]['parametro_conforme_artigo'],
+                  valor: obj[i]['valor'],
+                  unidade: obj[i]['unidade'],
+                },
+              ],
+            });
+            j++;
+            first = false;
+            notEnd = true;
+          } else if (
+            obj[i]['bacia'] === obj[i + 1]['bacia'] &&
+            obj[i]['municipio'] === obj[i + 1]['municipio'] &&
+            obj[i]['latitude_s'] === obj[i + 1]['latitude_s'] &&
+            obj[i]['longitude_o'] === obj[i + 1]['longitude_o'] &&
+            obj[i]['coordenadas_utm_e'] === obj[i + 1]['coordenadas_utm_e'] &&
+            obj[i]['coordenadas_utm_n'] === obj[i + 1]['coordenadas_utm_n'] &&
+            obj[i]['data_coleta'] === obj[i + 1]['data_coleta'] &&
+            !first
+          ) {
+            arrayJson[j - 1].data.push({
+              parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+              valor: obj[i]['valor'],
+              unidade: obj[i]['unidade'],
+            });
           } else {
-            if ((data[0].values[i][1] === data[0].values[i - 1][1]) && (data[0].values[i][2] === data[0].values[i - 1][2])
-              && (data[0].values[i][3] === data[0].values[i - 1][3]) && (data[0].values[i][4] === data[0].values[i - 1][4])
-              && (data[0].values[i][5] === data[0].values[i - 1][5]) && (data[0].values[i][6] === data[0].values[i - 1][6])
-              && (data[0].values[i][16] === data[0].values[i - 1][16])) {
-              arrayJson[j - 1].data.push({
-                parametro_conforme_artigo: data[0].values[i][9],
-                valor: data[0].values[i][11],
-                unidade: data[0].values[i][13]
-              });
-            } else {
-              arrayJson.push({
-                bacia: data[0].values[i][1],
-                municipio: data[0].values[i][2],
-                lat: data[0].values[i][3],
-                long: data[0].values[i][4],
-                update: data[0].values[i][16],
-                altitude: data[0].values[i][7],
-                data: [{
-                  parametro_conforme_artigo: data[0].values[i][9],
-                  valor: data[0].values[i][11],
-                  unidade: data[0].values[i][13]
-                }]
-              });
-            }
+            arrayJson[j - 1].data.push({
+              parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+              valor: obj[i]['valor'],
+              unidade: obj[i]['unidade'],
+            });
+            notEnd = false;
+            first = true;
           }
-
+        } else {
+          if (
+            obj[i]['bacia'] === obj[i - 1]['bacia'] &&
+            obj[i]['municipio'] === obj[i - 1]['municipio'] &&
+            obj[i]['latitude_s'] === obj[i - 1]['latitude_s'] &&
+            obj[i]['longitude_o'] === obj[i - 1]['longitude_o'] &&
+            obj[i]['coordenadas_utm_e'] === obj[i - 1]['coordenadas_utm_e'] &&
+            obj[i]['coordenadas_utm_n'] === obj[i - 1]['coordenadas_utm_n'] &&
+            obj[i]['data_coleta'] === obj[i - 1]['data_coleta']
+          ) {
+            arrayJson[j - 1].data.push({
+              parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+              valor: obj[i]['valor'],
+              unidade: obj[i]['unidade'],
+            });
+          } else {
+            arrayJson.push({
+              bacia: obj[i]['bacia'],
+              municipio: obj[i]['municipio'],
+              lat: obj[i]['latitude_s'],
+              long: obj[i]['longitude_o'],
+              update: obj[i]['data_coleta'],
+              altitude: obj[i]['altitude_m'],
+              data: [
+                {
+                  parametro_conforme_artigo:
+                    obj[i]['parametro_conforme_artigo'],
+                  valor: obj[i]['valor'],
+                  unidade: obj[i]['unidade'],
+                },
+              ],
+            });
+          }
         }
-        console.log(arrayJson);
-        const jsonConvertedArray = JSON.stringify(arrayJson);
-        console.log(jsonConvertedArray);
-        console.log(data); });
+      }
+      console.log(arrayJson);
+      console.log(obj);
+    });
   }
 }
