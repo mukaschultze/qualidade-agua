@@ -70,7 +70,12 @@ export class MapComponent implements OnInit, AfterViewInit {
   onMapReady() {
     this.http.get('assets/bacias.json').subscribe((json: any) => {
       this.json = json;
-      L.geoJSON(this.json).addTo(this.map);
+      L.geoJSON(this.json, {
+        style: {
+          color: "cyan"
+        }
+      })
+      .addTo(this.map);
     });
   }
 
