@@ -6,6 +6,7 @@ import { catchError, map, shareReplay } from 'rxjs/operators';
 import type * as initSqlJsTypes from 'sql.js';
 import { SqlJs } from 'sql.js/module';
 import * as utmObj from 'utm-latlng';
+import { Data } from './models/data.models';
 
 initSqlJs = (window as any).initSqlJs as typeof initSqlJsTypes;
 
@@ -71,5 +72,139 @@ export class DatabaseService {
     if (aa.lat < -180) aa = this.utm.convertUtmToLatLng(+e!, +n!, 21, 'J');
     const { lat, lgn } = aa;
     return { lat: +lat, lgn: +lgn };
+  }
+
+  getDados(): Observable<Array<Data>> {
+    return this.runSql(
+      'SELECT * FROM dados_coletados WHERE longitude_o AND latitude_s !=  "" OR coordenadas_utm_e AND coordenadas_utm_n !=  ""'
+    ).pipe(
+      map((a) => {
+        // MAGIA NEGRA DO JS
+        const obj = a.map((table) =>
+          table.values.map((row) =>
+            table.columns
+              .map((colName, idx) => ({ [colName]: row[idx] }))
+              .reduce((acc, cur) => ({ ...acc, ...cur }), {})
+          )
+        )[0];
+
+        const arrayJson = [];
+        let first = true;
+        let notEnd = false;
+        let j = 0;
+
+        for (let i = 0; i < obj.length; i++) {
+          if (i !== obj.length - 1) {
+            if (
+              obj[i]['identificacao_corpo_hidrico'] ===
+                obj[i + 1]['identificacao_corpo_hidrico'] &&
+              obj[i]['bacia'] === obj[i + 1]['bacia'] &&
+              obj[i]['municipio'] === obj[i + 1]['municipio'] &&
+              obj[i]['latitude_s'] === obj[i + 1]['latitude_s'] &&
+              obj[i]['longitude_o'] === obj[i + 1]['longitude_o'] &&
+              obj[i]['coordenadas_utm_e'] === obj[i + 1]['coordenadas_utm_e'] &&
+              obj[i]['coordenadas_utm_n'] === obj[i + 1]['coordenadas_utm_n'] &&
+              obj[i]['data_coleta'] === obj[i + 1]['data_coleta'] &&
+              first
+            ) {
+              arrayJson.push({
+                bacia: obj[i]['bacia'],
+                municipio: obj[i]['municipio'],
+                lat:
+                  (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
+                    ? this.convertLat(obj[i]['latitude_s'])
+                    : null,
+                long:
+                  (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
+                    ? this.convertLon(obj[i]['longitude_o'])
+                    : null,
+                update: obj[i]['data_coleta'],
+                altitude: obj[i]['altitude_m'],
+                data: [
+                  {
+                    parametro_conforme_artigo:
+                      obj[i]['parametro_conforme_artigo'],
+                    valor: obj[i]['valor'],
+                    unidade: obj[i]['unidade'],
+                  },
+                ],
+              });
+              j++;
+              first = false;
+              notEnd = true;
+            } else if (
+              obj[i]['identificacao_corpo_hidrico'] ===
+                obj[i + 1]['identificacao_corpo_hidrico'] &&
+              obj[i]['bacia'] === obj[i + 1]['bacia'] &&
+              obj[i]['municipio'] === obj[i + 1]['municipio'] &&
+              obj[i]['latitude_s'] === obj[i + 1]['latitude_s'] &&
+              obj[i]['longitude_o'] === obj[i + 1]['longitude_o'] &&
+              obj[i]['coordenadas_utm_e'] === obj[i + 1]['coordenadas_utm_e'] &&
+              obj[i]['coordenadas_utm_n'] === obj[i + 1]['coordenadas_utm_n'] &&
+              obj[i]['data_coleta'] === obj[i + 1]['data_coleta'] &&
+              !first
+            ) {
+              arrayJson[j - 1].data.push({
+                parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+                valor: obj[i]['valor'],
+                unidade: obj[i]['unidade'],
+              });
+            } else {
+              arrayJson[j - 1].data.push({
+                parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+                valor: obj[i]['valor'],
+                unidade: obj[i]['unidade'],
+              });
+              notEnd = false;
+              first = true;
+            }
+          } else {
+            if (
+              obj[i]['identificacao_corpo_hidrico'] ===
+                obj[i - 1]['identificacao_corpo_hidrico'] &&
+              obj[i]['bacia'] === obj[i - 1]['bacia'] &&
+              obj[i]['municipio'] === obj[i - 1]['municipio'] &&
+              obj[i]['latitude_s'] === obj[i - 1]['latitude_s'] &&
+              obj[i]['longitude_o'] === obj[i - 1]['longitude_o'] &&
+              obj[i]['coordenadas_utm_e'] === obj[i - 1]['coordenadas_utm_e'] &&
+              obj[i]['coordenadas_utm_n'] === obj[i - 1]['coordenadas_utm_n'] &&
+              obj[i]['data_coleta'] === obj[i - 1]['data_coleta']
+            ) {
+              arrayJson[j - 1].data.push({
+                parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+                valor: obj[i]['valor'],
+                unidade: obj[i]['unidade'],
+              });
+            } else {
+              arrayJson.push({
+                bacia: obj[i]['bacia'],
+                municipio: obj[i]['municipio'],
+                lat:
+                  (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
+                    ? this.convertLat(obj[i]['latitude_s'])
+                    : null,
+                long:
+                  (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
+                    ? this.convertLon(obj[i]['longitude_o'])
+                    : null,
+                update: obj[i]['data_coleta'],
+                altitude: obj[i]['altitude_m'],
+                data: [
+                  {
+                    parametro_conforme_artigo:
+                      obj[i]['parametro_conforme_artigo'],
+                    valor: obj[i]['valor'],
+                    unidade: obj[i]['unidade'],
+                  },
+                ],
+              });
+            }
+          }
+        }
+        return arrayJson;
+        // console.log(arrayJson);
+        // console.log(obj);
+      })
+    );
   }
 }
