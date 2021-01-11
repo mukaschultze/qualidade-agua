@@ -51,24 +51,31 @@ export class MapComponent implements OnInit, AfterViewInit {
 
   addCircles() {
     this.data.map((e: Data) => {
-      L.circle([+!e.lat, +!e.long], {
-        radius: 5000,
-        color: "blue",
-        fillOpacity: 0.1
-      }).addTo(this.map).bindPopup(
-        '<label><b>Nome:</b> ' + e.bacia + '</label><br>' +
-        '<b><label> Última coleta: </b>' + e.update + '<br>' +
-        e.data.map((i) => {
-          return '<br><label><b>' + i.parametro_conforme_artigo + ': </b> ' + i.valor + ' ' + i.unidade + '</label>';
-        })
-      );
+      if (e.lat && e.long) {
+        L.circle([+e.lat, +e.long], {
+          radius: 5000,
+          color: "blue",
+          fillOpacity: 0.1
+        }).addTo(this.map).bindPopup(
+          '<label><b>Nome:</b> ' + e.bacia + '</label><br>' +
+          '<b><label> Última coleta: </b>' + e.update + '<br>' +
+          e.data.map((i) => {
+            return '<br><label><b>' + i.parametro_conforme_artigo + ': </b> ' + i.valor + ' ' + i.unidade + '</label>';
+          })
+        );
+      }
     });
   }
 
   onMapReady() {
     this.http.get('assets/bacias.json').subscribe((json: any) => {
       this.json = json;
-      L.geoJSON(this.json).addTo(this.map);
+      L.geoJSON(this.json, {
+        style: {
+          color: "cyan"
+        }
+      })
+      .addTo(this.map);
     });
   }
 
