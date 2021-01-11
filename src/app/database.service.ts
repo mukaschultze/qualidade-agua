@@ -5,11 +5,14 @@ import { EMPTY, forkJoin, from, Observable } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
 import type * as initSqlJsTypes from 'sql.js';
 import { SqlJs } from 'sql.js/module';
+import * as utmObj from 'utm-latlng';
 
 initSqlJs = (window as any).initSqlJs as typeof initSqlJsTypes;
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseService {
+  private readonly utm = new utmObj();
+
   private sql$: Observable<SqlJs.SqlJsStatic>;
   private db$: Observable<SqlJs.Database>;
 
@@ -61,5 +64,12 @@ export class DatabaseService {
         );
 
     return geolib.toDecimal(sanitized);
+  }
+
+  utmToLatLon(n: SqlJs.ValueType, e: SqlJs.ValueType) {
+    let aa = this.utm.convertUtmToLatLng(+e!, +n!, 22, 'J');
+    if (aa.lat < -180) aa = this.utm.convertUtmToLatLng(+e!, +n!, 21, 'J');
+    const { lat, lgn } = aa;
+    return { lat: +lat, lgn: +lgn };
   }
 }
