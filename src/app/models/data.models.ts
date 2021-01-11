@@ -1,16 +1,18 @@
+import { SqlJs } from "sql.js/module";
+
 export interface Data{
-    bacia: string;
-    municipio: string;
-    lat: number;
-    long: number;
-    update: string;
-    altitude: number;
+    bacia:  SqlJs.ValueType;
+    municipio: SqlJs.ValueType;
+    lat: SqlJs.ValueType;
+    long: SqlJs.ValueType;
+    update: SqlJs.ValueType;
+    altitude: SqlJs.ValueType;
     data: Array<qualidade>
 
 }
 
 export interface qualidade{
-    parametro: string;
-    valor: string;
-    unidade: string;
+    parametro_conforme_artigo: SqlJs.ValueType;
+    valor: SqlJs.ValueType;
+    unidade: SqlJs.ValueType;
 }

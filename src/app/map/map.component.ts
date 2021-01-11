@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy, AfterViewInit } from '@angu
 import { DbService } from '../db.service';
 import * as L from "leaflet";
 import { Data } from "../models/data.models";
+import { DatabaseService } from '../database.service';
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
@@ -16,12 +17,13 @@ export class MapComponent implements OnInit, AfterViewInit {
   data: Array<Data> = [];
 
   constructor(
-    private dbService: DbService
+    private dbService: DatabaseService
   ) { }
 
   ngOnInit(): void {
-    this.dbService.getData().subscribe((data) => {
+    this.dbService.getDados().subscribe((data) => {
       this.data = data;
+      console.log(data[0]);
       this.addCircles();
     });
   }
@@ -46,7 +48,7 @@ export class MapComponent implements OnInit, AfterViewInit {
 
   addCircles() {
     this.data.map((e: Data) => {
-      L.circle([e.lat, e.long], {
+      L.circle([+!e.lat, +!e.long], {
         radius: 5000,
         color: "blue",
         fillOpacity: 0.1
@@ -54,7 +56,7 @@ export class MapComponent implements OnInit, AfterViewInit {
         '<label><b>Nome:</b> ' + e.bacia + '</label><br>' +
         '<b><label> Última coleta: </b>' + e.update + '<br>' +
         e.data.map((i) => {
-          return '<br><label><b>' + i.parametro + ': </b> ' + i.valor + ' ' + i.unidade + '</label>';
+          return '<br><label><b>' + i.parametro_conforme_artigo + ': </b> ' + i.valor + ' ' + i.unidade + '</label>';
         })
       );
     });
