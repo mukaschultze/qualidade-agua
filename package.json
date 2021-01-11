@@ -27,6 +27,7 @@
     "rxjs": "~6.6.0",
     "sql.js": "^1.4.0",
     "tslib": "^2.0.0",
+    "utm-latlng": "^1.0.6",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

@@ -1,16 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as geolib from 'geolib';
-import { EMPTY, forkJoin, from, Observable, of } from 'rxjs';
+import { EMPTY, forkJoin, from, Observable } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
 import type * as initSqlJsTypes from 'sql.js';
 import { SqlJs } from 'sql.js/module';
+import * as utmObj from 'utm-latlng';
 import { Data } from './models/data.models';
 
 initSqlJs = (window as any).initSqlJs as typeof initSqlJsTypes;
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseService {
+  private readonly utm = new utmObj();
+
   private sql$: Observable<SqlJs.SqlJsStatic>;
   private db$: Observable<SqlJs.Database>;
 
@@ -46,9 +49,9 @@ export class DatabaseService {
     const sanitized = !isNaN(+lat!)
       ? +lat!
       : (lat as string).replace(
-        /.+?(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
-        '$1°$2\'$3.$50"S'
-      );
+          /.+?(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
+          '$1°$2\'$3.$50"S'
+        );
 
     return geolib.toDecimal(sanitized);
   }
@@ -57,15 +60,24 @@ export class DatabaseService {
     const sanitized = !isNaN(+lon!)
       ? +lon!
       : (lon as string).replace(
-        /.+?(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
-        '$1°$2\'$3.$50"O'
-      );
+          /.+?(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
+          '$1°$2\'$3.$50"O'
+        );
 
     return geolib.toDecimal(sanitized);
   }
 
+  utmToLatLon(n: SqlJs.ValueType, e: SqlJs.ValueType) {
+    let aa = this.utm.convertUtmToLatLng(+e!, +n!, 22, 'J');
+    if (aa.lat < -180) aa = this.utm.convertUtmToLatLng(+e!, +n!, 21, 'J');
+    const { lat, lgn } = aa;
+    return { lat: +lat, lgn: +lgn };
+  }
+
   getDados(): Observable<Array<Data>> {
-    return this.runSql('SELECT * FROM dados_coletados WHERE longitude_o AND latitude_s !=  "" OR coordenadas_utm_e AND coordenadas_utm_n !=  ""').pipe(
+    return this.runSql(
+      'SELECT * FROM dados_coletados WHERE longitude_o AND latitude_s !=  "" OR coordenadas_utm_e AND coordenadas_utm_n !=  ""'
+    ).pipe(
       map((a) => {
         // MAGIA NEGRA DO JS
         const obj = a.map((table) =>
@@ -84,7 +96,8 @@ export class DatabaseService {
         for (let i = 0; i < obj.length; i++) {
           if (i !== obj.length - 1) {
             if (
-              obj[i]['identificacao_corpo_hidrico'] === obj[i + 1]['identificacao_corpo_hidrico'] &&
+              obj[i]['identificacao_corpo_hidrico'] ===
+                obj[i + 1]['identificacao_corpo_hidrico'] &&
               obj[i]['bacia'] === obj[i + 1]['bacia'] &&
               obj[i]['municipio'] === obj[i + 1]['municipio'] &&
               obj[i]['latitude_s'] === obj[i + 1]['latitude_s'] &&
@@ -97,8 +110,14 @@ export class DatabaseService {
               arrayJson.push({
                 bacia: obj[i]['bacia'],
                 municipio: obj[i]['municipio'],
-                lat: (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== '' ? this.convertLat(obj[i]['latitude_s']) : null,
-                long: (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== '' ? this.convertLon(obj[i]['longitude_o']) : null,
+                lat:
+                  (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
+                    ? this.convertLat(obj[i]['latitude_s'])
+                    : null,
+                long:
+                  (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
+                    ? this.convertLon(obj[i]['longitude_o'])
+                    : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
                 data: [
@@ -114,7 +133,8 @@ export class DatabaseService {
               first = false;
               notEnd = true;
             } else if (
-              obj[i]['identificacao_corpo_hidrico'] === obj[i + 1]['identificacao_corpo_hidrico'] &&
+              obj[i]['identificacao_corpo_hidrico'] ===
+                obj[i + 1]['identificacao_corpo_hidrico'] &&
               obj[i]['bacia'] === obj[i + 1]['bacia'] &&
               obj[i]['municipio'] === obj[i + 1]['municipio'] &&
               obj[i]['latitude_s'] === obj[i + 1]['latitude_s'] &&
@@ -140,7 +160,8 @@ export class DatabaseService {
             }
           } else {
             if (
-              obj[i]['identificacao_corpo_hidrico'] === obj[i - 1]['identificacao_corpo_hidrico'] &&
+              obj[i]['identificacao_corpo_hidrico'] ===
+                obj[i - 1]['identificacao_corpo_hidrico'] &&
               obj[i]['bacia'] === obj[i - 1]['bacia'] &&
               obj[i]['municipio'] === obj[i - 1]['municipio'] &&
               obj[i]['latitude_s'] === obj[i - 1]['latitude_s'] &&
@@ -158,8 +179,14 @@ export class DatabaseService {
               arrayJson.push({
                 bacia: obj[i]['bacia'],
                 municipio: obj[i]['municipio'],
-                lat: (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== '' ? this.convertLat(obj[i]['latitude_s']) : null,
-                long: (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== '' ? this.convertLon(obj[i]['longitude_o']) : null,
+                lat:
+                  (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
+                    ? this.convertLat(obj[i]['latitude_s'])
+                    : null,
+                long:
+                  (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
+                    ? this.convertLon(obj[i]['longitude_o'])
+                    : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
                 data: [
@@ -177,9 +204,7 @@ export class DatabaseService {
         return arrayJson;
         // console.log(arrayJson);
         // console.log(obj);
-
       })
     );
   }
-
 }
