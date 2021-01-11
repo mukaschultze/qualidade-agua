@@ -3,6 +3,7 @@ import { DbService } from '../db.service';
 import * as L from "leaflet";
 import { Data } from "../models/data.models";
 import { DatabaseService } from '../database.service';
+import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
@@ -12,24 +13,26 @@ import { DatabaseService } from '../database.service';
 export class MapComponent implements OnInit, AfterViewInit {
 
   private map: any;
-
+  json: any;
 
   data: Array<Data> = [];
 
   constructor(
-    private dbService: DatabaseService
+    private dbService: DatabaseService,
+    private http: HttpClient
   ) { }
 
   ngOnInit(): void {
     this.dbService.getDados().subscribe((data) => {
       this.data = data;
-      console.log(data[0]);
+      // console.log(data[0]);
       this.addCircles();
     });
   }
 
   ngAfterViewInit(): void {
     this.initMap();
+    this.onMapReady();
   }
 
   private initMap(): void {
@@ -62,6 +65,12 @@ export class MapComponent implements OnInit, AfterViewInit {
     });
   }
 
-
+  onMapReady() {
+    this.http.get('assets/bacias.json').subscribe((json: any) => {
+      console.log(json);
+      this.json = json;
+      L.geoJSON(this.json).addTo(this.map);
+    });
+  }
 
 }
