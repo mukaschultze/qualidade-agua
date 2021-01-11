@@ -25,7 +25,7 @@ export class MapComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.dbService.getDados().subscribe((data) => {
       this.data = data;
-      // console.log(data[0]);
+      console.log(data);
       this.addCircles();
     });
   }
@@ -67,7 +67,6 @@ export class MapComponent implements OnInit, AfterViewInit {
 
   onMapReady() {
     this.http.get('assets/bacias.json').subscribe((json: any) => {
-      console.log(json);
       this.json = json;
       L.geoJSON(this.json).addTo(this.map);
     });

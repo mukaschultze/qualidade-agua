@@ -97,8 +97,8 @@ export class DatabaseService {
               arrayJson.push({
                 bacia: obj[i]['bacia'],
                 municipio: obj[i]['municipio'],
-                lat: obj[i]['latitude_s'],
-                long: obj[i]['longitude_o'],
+                lat: (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== '' ? this.convertLat(obj[i]['latitude_s']) : null,
+                long: (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== '' ? this.convertLon(obj[i]['longitude_o']) : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
                 data: [
@@ -158,8 +158,8 @@ export class DatabaseService {
               arrayJson.push({
                 bacia: obj[i]['bacia'],
                 municipio: obj[i]['municipio'],
-                lat: obj[i]['latitude_s'],
-                long: obj[i]['longitude_o'],
+                lat: (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== '' ? this.convertLat(obj[i]['latitude_s']) : null,
+                long: (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== '' ? this.convertLon(obj[i]['longitude_o']) : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
                 data: [
