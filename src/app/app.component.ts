@@ -8,7 +8,7 @@ import { DatabaseService } from './database.service';
 })
 export class AppComponent {
   constructor(private database: DatabaseService) {
-    this.database.runSql('SELECT * FROM dados_coletados').subscribe((a) => {
+    this.database.runSql('SELECT * FROM dados_coletados WHERE longitude_o AND latitude_s !=  "" OR coordenadas_utm_e AND coordenadas_utm_n !=  ""').subscribe((a) => {
       // MAGIA NEGRA DO JS
       const obj = a.map((table) =>
         table.values.map((row) =>
@@ -26,6 +26,7 @@ export class AppComponent {
       for (let i = 0; i < obj.length; i++) {
         if (i !== obj.length - 1) {
           if (
+            obj[i]['identificacao_corpo_hidrico'] === obj[i + 1]['identificacao_corpo_hidrico'] &&
             obj[i]['bacia'] === obj[i + 1]['bacia'] &&
             obj[i]['municipio'] === obj[i + 1]['municipio'] &&
             obj[i]['latitude_s'] === obj[i + 1]['latitude_s'] &&
@@ -55,6 +56,7 @@ export class AppComponent {
             first = false;
             notEnd = true;
           } else if (
+            obj[i]['identificacao_corpo_hidrico'] === obj[i + 1]['identificacao_corpo_hidrico'] &&
             obj[i]['bacia'] === obj[i + 1]['bacia'] &&
             obj[i]['municipio'] === obj[i + 1]['municipio'] &&
             obj[i]['latitude_s'] === obj[i + 1]['latitude_s'] &&
@@ -80,6 +82,7 @@ export class AppComponent {
           }
         } else {
           if (
+            obj[i]['identificacao_corpo_hidrico'] === obj[i - 1]['identificacao_corpo_hidrico'] &&
             obj[i]['bacia'] === obj[i - 1]['bacia'] &&
             obj[i]['municipio'] === obj[i - 1]['municipio'] &&
             obj[i]['latitude_s'] === obj[i - 1]['latitude_s'] &&
