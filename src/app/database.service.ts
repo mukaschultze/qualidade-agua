@@ -124,17 +124,24 @@ export class DatabaseService {
               obj[i]['data_coleta'] === obj[i + 1]['data_coleta'] &&
               !first
             ) {
-              arrayJson[j - 1].data.push({
-                parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
-                valor: obj[i]['valor'],
-                unidade: obj[i]['unidade'],
-              });
+              if (!arrayJson[j - 1].data
+                .find((e) => e.parametro_conforme_artigo === obj[i]['parametro_conforme_artigo'] && e.unidade === obj[i]['unidade'])) {
+                arrayJson[j - 1].data.push({
+                  parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+                  valor: obj[i]['valor'],
+                  unidade: obj[i]['unidade'],
+                });
+
+              }
             } else {
-              arrayJson[j - 1].data.push({
-                parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
-                valor: obj[i]['valor'],
-                unidade: obj[i]['unidade'],
-              });
+              if (!arrayJson[j - 1].data
+                .find((e) => e.parametro_conforme_artigo === obj[i]['parametro_conforme_artigo'] && e.unidade === obj[i]['unidade'])) {
+                  arrayJson[j - 1].data.push({
+                    parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+                    valor: obj[i]['valor'],
+                    unidade: obj[i]['unidade'],
+                  });
+              }
               notEnd = false;
               first = true;
             }
