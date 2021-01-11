@@ -49,22 +49,26 @@ export class DatabaseService {
     const sanitized = !isNaN(+lat!)
       ? +lat!
       : (lat as string).replace(
-          /.+?(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
+          / *(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
           '$1°$2\'$3.$50"S'
         );
 
-    return geolib.toDecimal(sanitized);
+    const res = geolib.toDecimal(sanitized);
+    // console.log('LAT', lat, sanitized, res);
+    return res;
   }
 
   convertLon(lon: any) {
     const sanitized = !isNaN(+lon!)
       ? +lon!
       : (lon as string).replace(
-          /.+?(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
+          / *(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
           '$1°$2\'$3.$50"O'
         );
 
-    return geolib.toDecimal(sanitized);
+    const res = geolib.toDecimal(sanitized);
+    // console.log('LON', lon, sanitized, res);
+    return res;
   }
 
   utmToLatLon(n: SqlJs.ValueType, e: SqlJs.ValueType) {
