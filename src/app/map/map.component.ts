@@ -32,7 +32,6 @@ export class MapComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initMap();
-    this.onMapReady();
   }
 
   private initMap(): void {
@@ -65,18 +64,19 @@ export class MapComponent implements OnInit, AfterViewInit {
         );
       }
     });
+    this.onMapReady();
   }
 
   onMapReady() {
-    // this.http.get('assets/bacias.json').subscribe((json: any) => {
-    //   this.json = json;
-    //   L.geoJSON(this.json, {
-    //     style: {
-    //       color: "cyan"
-    //     }
-    //   })
-    //   .addTo(this.map);
-    // });
+    this.http.get('assets/bacias.json').subscribe((json: any) => {
+      this.json = json;
+      L.geoJSON(this.json, {
+        style: {
+          color: "blue"
+        }
+      })
+      .addTo(this.map);
+    });
   }
 
 }
