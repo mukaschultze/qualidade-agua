@@ -50,12 +50,12 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
 
   addCircles() {
+    var icon = new L.Icon.Default();
+    icon.options.shadowSize = [12,10];
     this.data.map((e: Data) => {
       if (e.lat && e.long) {
-        L.circle([+e.lat, +e.long], {
-          radius: 5000,
-          color: "blue",
-          fillOpacity: 0.1
+        L.marker([+e.lat, +e.long], {
+          icon: icon
         }).addTo(this.map).bindPopup(
           '<label><b>Nome:</b> ' + e.bacia + '</label><br>' +
           '<b><label> Última coleta: </b>' + e.update + '<br>' +
@@ -68,15 +68,15 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
 
   onMapReady() {
-    this.http.get('assets/bacias.json').subscribe((json: any) => {
-      this.json = json;
-      L.geoJSON(this.json, {
-        style: {
-          color: "cyan"
-        }
-      })
-      .addTo(this.map);
-    });
+    // this.http.get('assets/bacias.json').subscribe((json: any) => {
+    //   this.json = json;
+    //   L.geoJSON(this.json, {
+    //     style: {
+    //       color: "cyan"
+    //     }
+    //   })
+    //   .addTo(this.map);
+    // });
   }
 
 }
