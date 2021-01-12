@@ -74,8 +74,8 @@ export class DatabaseService {
   utmToLatLon(n: SqlJs.ValueType, e: SqlJs.ValueType) {
     let aa = this.utm.convertUtmToLatLng(+e!, +n!, 22, 'J');
     if (aa.lat < -180) aa = this.utm.convertUtmToLatLng(+e!, +n!, 21, 'J');
-    const { lat, lgn } = aa;
-    return { lat: +lat, lgn: +lgn };
+    const { lat, lng } = aa;
+    return { lat: +lat, lng: +lng };
   }
 
   getDados(): Observable<Array<Data>> {
@@ -121,14 +121,14 @@ export class DatabaseService {
                 lat:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
                     ? this.convertLat(obj[i]['latitude_s']) :
-                    (obj[i].coordenadas_utm_e && obj[i].coordenadas_utm_n) !== ''
-                      ? this.utmToLatLon(obj[i].coordenadas_utm_e, obj[i].coordenadas_utm_n).lat
+                    (obj[i]['coordenadas_utm_n'] && obj[i]['coordenadas_utm_e']) !== ''
+                      ? this.utmToLatLon(obj[i]['coordenadas_utm_n'], obj[i]['coordenadas_utm_e']).lat
                     : null,
                 long:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
                     ? this.convertLon(obj[i]['longitude_o']) :
-                    (obj[i].coordenadas_utm_e && obj[i].coordenadas_utm_n) !== ''
-                      ? this.utmToLatLon(obj[i].coordenadas_utm_e, obj[i].coordenadas_utm_n).lgn
+                    (obj[i]['coordenadas_utm_n'] && obj[i]['coordenadas_utm_e']) !== ''
+                      ? this.utmToLatLon(obj[i]['coordenadas_utm_n'], obj[i]['coordenadas_utm_e']).lng
                     : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
@@ -204,14 +204,14 @@ export class DatabaseService {
                 lat:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
                     ? this.convertLat(obj[i]['latitude_s']) :
-                    (obj[i].coordenadas_utm_e && obj[i].coordenadas_utm_n) !== ''
-                      ? this.utmToLatLon(obj[i].coordenadas_utm_e, obj[i].coordenadas_utm_n).lat
+                    (obj[i]['coordenadas_utm_n'] && obj[i]['coordenadas_utm_e']) !== ''
+                      ? this.utmToLatLon(obj[i]['coordenadas_utm_n'], obj[i]['coordenadas_utm_e']).lat
                     : null,
                 long:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
                     ? this.convertLon(obj[i]['longitude_o']) :
-                    (obj[i].coordenadas_utm_e && obj[i].coordenadas_utm_n) !== ''
-                      ? this.utmToLatLon(obj[i].coordenadas_utm_e, obj[i].coordenadas_utm_n).lgn
+                    (obj[i]['coordenadas_utm_e'] && obj[i]['coordenadas_utm_n']) !== ''
+                      ? this.utmToLatLon(obj[i]['coordenadas_utm_n'], obj[i]['coordenadas_utm_e']).lng
                     : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
