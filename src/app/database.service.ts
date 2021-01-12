@@ -63,7 +63,7 @@ export class DatabaseService {
       ? +lon!
       : (lon as string).replace(
           / *(\d+).+?(\d+).+?(\d+)(\.|,(\d+))?.+/g,
-          '$1°$2\'$3.$50"O'
+          '$1°$2\'$3.$50"W'
         );
 
     const res = geolib.toDecimal(sanitized);
@@ -81,7 +81,7 @@ export class DatabaseService {
   getDados(): Observable<Array<Data>> {
     return this.runSql(
       'SELECT * FROM dados_coletados WHERE longitude_o AND latitude_s !=  "" OR coordenadas_utm_e AND coordenadas_utm_n !=  ""'
-    ).pipe(
+    ).pipe( // No select são deixados de lados na cláusula where os dados que não tem coordenadas
       map((a) => {
         // MAGIA NEGRA DO JS
         const obj = a.map((table) =>
@@ -111,16 +111,24 @@ export class DatabaseService {
               obj[i]['data_coleta'] === obj[i + 1]['data_coleta'] &&
               first
             ) {
+              // Essa comparação funciona como uma intersecção,
+              // o novo elemento é criado apenas se o dado atual for igual ao próximo
+
+              // Para as coordenadas precisa de uma função de conversão para o formato aceito pelo geoJson
               arrayJson.push({
                 bacia: obj[i]['bacia'],
                 municipio: obj[i]['municipio'],
                 lat:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
-                    ? this.convertLat(obj[i]['latitude_s'])
+                    ? this.convertLat(obj[i]['latitude_s']) :
+                    (obj[i].coordenadas_utm_e && obj[i].coordenadas_utm_n) !== ''
+                      ? this.utmToLatLon(obj[i].coordenadas_utm_e, obj[i].coordenadas_utm_n).lat
                     : null,
                 long:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
-                    ? this.convertLon(obj[i]['longitude_o'])
+                    ? this.convertLon(obj[i]['longitude_o']) :
+                    (obj[i].coordenadas_utm_e && obj[i].coordenadas_utm_n) !== ''
+                      ? this.utmToLatLon(obj[i].coordenadas_utm_e, obj[i].coordenadas_utm_n).lgn
                     : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
@@ -148,6 +156,7 @@ export class DatabaseService {
               obj[i]['data_coleta'] === obj[i + 1]['data_coleta'] &&
               !first
             ) {
+              // Após a primeira aparição dos dados em comum é adicionado dentro do objeto em um array os parâmetros que mudam
               if (!arrayJson[j - 1].data
                 .find((e) => e.parametro_conforme_artigo === obj[i]['parametro_conforme_artigo'] && e.unidade === obj[i]['unidade'])) {
                 arrayJson[j - 1].data.push({
@@ -170,6 +179,8 @@ export class DatabaseService {
               first = true;
             }
           } else {
+            // Quando um dos parâmetros do próximo elemento não forem iguais ao atual
+            // O último dado daquele agrupamento é adicionado e começará um novo elemento no agrupamento
             if (
               obj[i]['identificacao_corpo_hidrico'] ===
                 obj[i - 1]['identificacao_corpo_hidrico'] &&
@@ -192,11 +203,15 @@ export class DatabaseService {
                 municipio: obj[i]['municipio'],
                 lat:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
-                    ? this.convertLat(obj[i]['latitude_s'])
+                    ? this.convertLat(obj[i]['latitude_s']) :
+                    (obj[i].coordenadas_utm_e && obj[i].coordenadas_utm_n) !== ''
+                      ? this.utmToLatLon(obj[i].coordenadas_utm_e, obj[i].coordenadas_utm_n).lat
                     : null,
                 long:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
-                    ? this.convertLon(obj[i]['longitude_o'])
+                    ? this.convertLon(obj[i]['longitude_o']) :
+                    (obj[i].coordenadas_utm_e && obj[i].coordenadas_utm_n) !== ''
+                      ? this.utmToLatLon(obj[i].coordenadas_utm_e, obj[i].coordenadas_utm_n).lgn
                     : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
