@@ -30,7 +30,7 @@ export class DatabaseService {
     ).pipe(shareReplay());
 
     const dbFile = this.http
-      .get('/assets/database.sqlite', {
+      .get('assets/database.sqlite', {
         responseType: 'arraybuffer',
         reportProgress: true,
         observe: 'events',
