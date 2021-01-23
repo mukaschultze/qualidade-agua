@@ -1,26 +1,26 @@
-import { Component, OnInit, ChangeDetectionStrategy, AfterViewInit } from '@angular/core';
-import { DbService } from '../db.service';
-import * as L from "leaflet";
-import { Data } from "../models/data.models";
-import { DatabaseService } from '../database.service';
 import { HttpClient } from '@angular/common/http';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+} from '@angular/core';
+import * as L from 'leaflet';
+import { DatabaseService } from '../database.service';
+import { Data } from '../models/data.models';
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MapComponent implements OnInit, AfterViewInit {
-
   private map: any;
   json: any;
 
   data: Array<Data> = [];
 
-  constructor(
-    private dbService: DatabaseService,
-    private http: HttpClient
-  ) { }
+  constructor(private dbService: DatabaseService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.dbService.getDados().subscribe((data) => {
@@ -37,31 +37,53 @@ export class MapComponent implements OnInit, AfterViewInit {
   private initMap(): void {
     this.map = L.map('map', {
       center: [-30, -53],
-      zoom: 7
+      zoom: 7,
     });
 
-    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    });
+    const tiles = L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        maxZoom: 19,
+        attribution:
+          '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }
+    );
 
     tiles.addTo(this.map);
   }
 
   addCircles() {
-    var icon = new L.Icon.Default();
-    icon.options.shadowSize = [12,10];
+    var icon = new L.Icon.Default({
+      iconUrl: 'assets/marker-icon.png',
+      shadowUrl: 'assets/marker-shadow.png',
+    });
+
+    icon.options.shadowSize = [12, 10];
     this.data.map((e: Data) => {
       if (e.lat && e.long) {
         L.marker([+e.lat, +e.long], {
-          icon: icon
-        }).addTo(this.map).bindPopup(
-          '<label><b>Nome:</b> ' + e.bacia + '</label><br>' +
-          '<b><label> Última coleta: </b>' + e.update + '<br>' +
-          e.data.map((i) => {
-            return '<br><label><b>' + i.parametro_conforme_artigo + ': </b> ' + i.valor + ' ' + i.unidade + '</label>';
-          })
-        );
+          icon: icon,
+        })
+          .addTo(this.map)
+          .bindPopup(
+            '<label><b>Nome:</b> ' +
+              e.bacia +
+              '</label><br>' +
+              '<b><label> Última coleta: </b>' +
+              e.update +
+              '<br>' +
+              e.data.map((i) => {
+                return (
+                  '<br><label><b>' +
+                  i.parametro_conforme_artigo +
+                  ': </b> ' +
+                  i.valor +
+                  ' ' +
+                  i.unidade +
+                  '</label>'
+                );
+              })
+          );
       }
     });
     this.onMapReady();
@@ -72,11 +94,9 @@ export class MapComponent implements OnInit, AfterViewInit {
       this.json = json;
       L.geoJSON(this.json, {
         style: {
-          color: "blue"
-        }
-      })
-      .addTo(this.map);
+          color: 'blue',
+        },
+      }).addTo(this.map);
     });
   }
-
 }
