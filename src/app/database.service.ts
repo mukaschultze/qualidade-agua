@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as geolib from 'geolib';
@@ -13,14 +14,13 @@ initSqlJs = (window as any).initSqlJs as typeof initSqlJsTypes;
 @Injectable({ providedIn: 'root' })
 export class DatabaseService {
   private readonly utm = new utmObj();
-  private readonly DB_URL = window.location.href + '/assets/database.sqlite';
 
   private sql$: Observable<SqlJs.SqlJsStatic>;
   private db$: Observable<SqlJs.Database>;
 
   readonly dbDownloadProgress$ = new BehaviorSubject(-1);
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private location: Location) {
     this.sql$ = from(
       initSqlJs({
         // Required to load the wasm binary asynchronously. Of course, you can host it wherever you want
@@ -29,8 +29,10 @@ export class DatabaseService {
       })
     ).pipe(shareReplay());
 
+    const dbUrl = this.location.prepareExternalUrl('/assets/database.sqlite');
+
     const dbFile = this.http
-      .get(this.DB_URL, {
+      .get(dbUrl, {
         responseType: 'arraybuffer',
         reportProgress: true,
         observe: 'events',
