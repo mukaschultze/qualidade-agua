@@ -20,3 +20,23 @@
     </mat-form-field>
   </form>
 </mat-toolbar>
+
+<ng-container *ngIf="(dbDownloadProgress$ | async) != null">
+  <ng-container
+    *ngTemplateOutlet="
+      loadingTemplate;
+      context: { progress: dbDownloadProgress$ | async }
+    "
+  ></ng-container>
+</ng-container>
+
+<ng-template let-progress="progress" #loadingTemplate>
+  <mat-progress-bar
+    [value]="progress * 100"
+    [mode]="
+      progress < 0 ? 'query' : progress > 0 ? 'determinate' : 'indeterminate'
+    "
+    *ngIf="progress < 1"
+  >
+  </mat-progress-bar>
+</ng-template>

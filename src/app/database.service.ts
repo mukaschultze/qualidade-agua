@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as geolib from 'geolib';
-import { EMPTY, forkJoin, from, Observable } from 'rxjs';
-import { catchError, map, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, EMPTY, forkJoin, from, Observable } from 'rxjs';
+import { catchError, filter, map, shareReplay, tap } from 'rxjs/operators';
 import type * as initSqlJsTypes from 'sql.js';
 import { SqlJs } from 'sql.js/module';
 import * as utmObj from 'utm-latlng';
@@ -13,9 +13,12 @@ initSqlJs = (window as any).initSqlJs as typeof initSqlJsTypes;
 @Injectable({ providedIn: 'root' })
 export class DatabaseService {
   private readonly utm = new utmObj();
+  private readonly DB_URL = window.location.href + '/assets/database.sqlite';
 
   private sql$: Observable<SqlJs.SqlJsStatic>;
   private db$: Observable<SqlJs.Database>;
+
+  readonly dbDownloadProgress$ = new BehaviorSubject(-1);
 
   constructor(private http: HttpClient) {
     this.sql$ = from(
@@ -26,13 +29,32 @@ export class DatabaseService {
       })
     ).pipe(shareReplay());
 
-    const DB_URL = window.location.href + '/assets/database.sqlite';
+    const dbFile = this.http
+      .get(this.DB_URL, {
+        responseType: 'arraybuffer',
+        reportProgress: true,
+        observe: 'events',
+      })
+      .pipe(
+        tap((evt) => {
+          if (evt.type === HttpEventType.DownloadProgress)
+            this.dbDownloadProgress$.next(
+              evt.total ? evt.loaded / evt.total : 0
+            );
+        }),
+        filter((evt) => evt.type === HttpEventType.Response),
+        map((res) => (res as HttpResponse<ArrayBuffer>).body),
+        tap(() => this.dbDownloadProgress$.next(1))
+      );
 
     this.db$ = forkJoin({
-      sqlite: this.http.get(DB_URL, { responseType: 'arraybuffer' }),
+      sqliteFile: dbFile,
       sqljs: this.sql$,
     }).pipe(
-      map(({ sqlite, sqljs }) => new sqljs.Database(new Uint8Array(sqlite))),
+      map(
+        ({ sqliteFile, sqljs }) =>
+          new sqljs.Database(new Uint8Array(sqliteFile as any))
+      ),
       shareReplay(),
       catchError((err) => {
         console.error(err);
@@ -81,7 +103,8 @@ export class DatabaseService {
   getDados(): Observable<Array<Data>> {
     return this.runSql(
       'SELECT * FROM dados_coletados WHERE longitude_o AND latitude_s !=  "" OR coordenadas_utm_e AND coordenadas_utm_n !=  ""'
-    ).pipe( // No select são deixados de lados na cláusula where os dados que não tem coordenadas
+    ).pipe(
+      // No select são deixados de lados na cláusula where os dados que não tem coordenadas
       map((a) => {
         // MAGIA NEGRA DO JS
         const obj = a.map((table) =>
@@ -120,15 +143,23 @@ export class DatabaseService {
                 municipio: obj[i]['municipio'],
                 lat:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
-                    ? this.convertLat(obj[i]['latitude_s']) :
-                    (obj[i]['coordenadas_utm_n'] && obj[i]['coordenadas_utm_e']) !== ''
-                      ? this.utmToLatLon(obj[i]['coordenadas_utm_n'], obj[i]['coordenadas_utm_e']).lat
+                    ? this.convertLat(obj[i]['latitude_s'])
+                    : (obj[i]['coordenadas_utm_n'] &&
+                        obj[i]['coordenadas_utm_e']) !== ''
+                    ? this.utmToLatLon(
+                        obj[i]['coordenadas_utm_n'],
+                        obj[i]['coordenadas_utm_e']
+                      ).lat
                     : null,
                 long:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
-                    ? this.convertLon(obj[i]['longitude_o']) :
-                    (obj[i]['coordenadas_utm_n'] && obj[i]['coordenadas_utm_e']) !== ''
-                      ? this.utmToLatLon(obj[i]['coordenadas_utm_n'], obj[i]['coordenadas_utm_e']).lng
+                    ? this.convertLon(obj[i]['longitude_o'])
+                    : (obj[i]['coordenadas_utm_n'] &&
+                        obj[i]['coordenadas_utm_e']) !== ''
+                    ? this.utmToLatLon(
+                        obj[i]['coordenadas_utm_n'],
+                        obj[i]['coordenadas_utm_e']
+                      ).lng
                     : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
@@ -157,23 +188,36 @@ export class DatabaseService {
               !first
             ) {
               // Após a primeira aparição dos dados em comum é adicionado dentro do objeto em um array os parâmetros que mudam
-              if (!arrayJson[j - 1].data
-                .find((e) => e.parametro_conforme_artigo === obj[i]['parametro_conforme_artigo'] && e.unidade === obj[i]['unidade'])) {
+              if (
+                !arrayJson[j - 1].data.find(
+                  (e) =>
+                    e.parametro_conforme_artigo ===
+                      obj[i]['parametro_conforme_artigo'] &&
+                    e.unidade === obj[i]['unidade']
+                )
+              ) {
                 arrayJson[j - 1].data.push({
-                  parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
+                  parametro_conforme_artigo:
+                    obj[i]['parametro_conforme_artigo'],
                   valor: obj[i]['valor'],
                   unidade: obj[i]['unidade'],
                 });
-
               }
             } else {
-              if (!arrayJson[j - 1].data
-                .find((e) => e.parametro_conforme_artigo === obj[i]['parametro_conforme_artigo'] && e.unidade === obj[i]['unidade'])) {
-                  arrayJson[j - 1].data.push({
-                    parametro_conforme_artigo: obj[i]['parametro_conforme_artigo'],
-                    valor: obj[i]['valor'],
-                    unidade: obj[i]['unidade'],
-                  });
+              if (
+                !arrayJson[j - 1].data.find(
+                  (e) =>
+                    e.parametro_conforme_artigo ===
+                      obj[i]['parametro_conforme_artigo'] &&
+                    e.unidade === obj[i]['unidade']
+                )
+              ) {
+                arrayJson[j - 1].data.push({
+                  parametro_conforme_artigo:
+                    obj[i]['parametro_conforme_artigo'],
+                  valor: obj[i]['valor'],
+                  unidade: obj[i]['unidade'],
+                });
               }
               notEnd = false;
               first = true;
@@ -203,15 +247,23 @@ export class DatabaseService {
                 municipio: obj[i]['municipio'],
                 lat:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
-                    ? this.convertLat(obj[i]['latitude_s']) :
-                    (obj[i]['coordenadas_utm_n'] && obj[i]['coordenadas_utm_e']) !== ''
-                      ? this.utmToLatLon(obj[i]['coordenadas_utm_n'], obj[i]['coordenadas_utm_e']).lat
+                    ? this.convertLat(obj[i]['latitude_s'])
+                    : (obj[i]['coordenadas_utm_n'] &&
+                        obj[i]['coordenadas_utm_e']) !== ''
+                    ? this.utmToLatLon(
+                        obj[i]['coordenadas_utm_n'],
+                        obj[i]['coordenadas_utm_e']
+                      ).lat
                     : null,
                 long:
                   (obj[i]['latitude_s'] && obj[i]['longitude_o']) !== ''
-                    ? this.convertLon(obj[i]['longitude_o']) :
-                    (obj[i]['coordenadas_utm_e'] && obj[i]['coordenadas_utm_n']) !== ''
-                      ? this.utmToLatLon(obj[i]['coordenadas_utm_n'], obj[i]['coordenadas_utm_e']).lng
+                    ? this.convertLon(obj[i]['longitude_o'])
+                    : (obj[i]['coordenadas_utm_e'] &&
+                        obj[i]['coordenadas_utm_n']) !== ''
+                    ? this.utmToLatLon(
+                        obj[i]['coordenadas_utm_n'],
+                        obj[i]['coordenadas_utm_e']
+                      ).lng
                     : null,
                 update: obj[i]['data_coleta'],
                 altitude: obj[i]['altitude_m'],
