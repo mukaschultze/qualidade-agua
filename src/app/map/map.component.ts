@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnInit,
 } from '@angular/core';
@@ -15,87 +15,81 @@ import { Data } from '../models/data.models';
   styleUrls: ['./map.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MapComponent implements OnInit, AfterViewInit {
-  private map: any;
-  json: any;
-
+export class MapComponent implements OnInit {
   data: Array<Data> = [];
 
-  constructor(private dbService: DatabaseService, private http: HttpClient) {}
+  readonly options: L.MapOptions = {
+    zoom: 7,
+    center: [-30, -53],
+  };
+
+  readonly layers: L.Layer[] = [
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution:
+        '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }),
+  ];
+
+  readonly defaultIconSettings = new L.Icon.Default({
+    imagePath: 'leaflet/',
+    shadowSize: [12, 10],
+  });
+
+  constructor(
+    private dbService: DatabaseService,
+    private http: HttpClient,
+    private cdRef: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.dbService.getDados().subscribe((data) => {
       this.data = data;
-      console.log(data);
       this.addCircles();
     });
   }
 
-  ngAfterViewInit(): void {
-    this.initMap();
-  }
-
-  private initMap(): void {
-    this.map = L.map('map', {
-      center: [-30, -53],
-      zoom: 7,
-    });
-
-    const tiles = L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      {
-        maxZoom: 19,
-        attribution:
-          '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      }
-    );
-
-    tiles.addTo(this.map);
-  }
-
   addCircles() {
-    var icon = new L.Icon.Default({
-      iconUrl: '',
-      shadowUrl: '',
-      shadowSize: [12, 10],
-    });
+    const markers = this.data
+      .filter((e: Data) => e.lat && e.long)
+      .map((e: Data) =>
+        L.marker([+e.lat!, +e.long!], {
+          icon: this.defaultIconSettings,
+        }).bindPopup(
+          '<label><b>Nome:</b> ' +
+            e.bacia +
+            '</label><br>' +
+            '<b><label> Última coleta: </b>' +
+            e.update +
+            '<br>' +
+            e.data.map((i) => {
+              return (
+                '<br><label><b>' +
+                i.parametro_conforme_artigo +
+                ': </b> ' +
+                i.valor +
+                ' ' +
+                i.unidade +
+                '</label>'
+              );
+            })
+        )
+      );
 
-    this.data.map((e: Data) => {
-      if (e.lat && e.long) {
-        L.marker([+e.lat, +e.long], { icon })
-          .addTo(this.map)
-          .bindPopup(
-            '<label><b>Nome:</b> ' +
-              e.bacia +
-              '</label><br>' +
-              '<b><label> Última coleta: </b>' +
-              e.update +
-              '<br>' +
-              e.data.map((i) => {
-                return (
-                  '<br><label><b>' +
-                  i.parametro_conforme_artigo +
-                  ': </b> ' +
-                  i.valor +
-                  ' ' +
-                  i.unidade +
-                  '</label>'
-                );
-              })
-          );
-      }
-    });
-    this.onMapReady();
+    this.layers?.push(...markers);
+    this.cdRef.markForCheck();
   }
 
-  onMapReady() {
-    this.http.get('assets/bacias.json').subscribe((json: any) => {
-      this.json = json;
-      L.geoJSON(this.json, {
+  onMapReady(map: L.Map) {
+    this.http.get('assets/bacias.json').subscribe((baciasGeoJson: any) => {
+      const bacias = L.geoJSON(baciasGeoJson, {
         style: {
           color: 'blue',
         },
-      }).addTo(this.map);
+      });
+
+      this.layers?.push(bacias);
+      this.cdRef.detectChanges();
     });
   }
 }
