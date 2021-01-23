@@ -3,7 +3,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  NgZone,
   OnInit,
+  TemplateRef,
+  ViewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import * as L from 'leaflet';
 import { DatabaseService } from '../database.service';
@@ -17,6 +21,9 @@ import { Data } from '../models/data.models';
 })
 export class MapComponent implements OnInit {
   data: Array<Data> = [];
+
+  @ViewChild('popupTemplate', { static: true })
+  private popupTemplate?: TemplateRef<any>;
 
   readonly options: L.MapOptions = {
     zoom: 7,
@@ -39,7 +46,9 @@ export class MapComponent implements OnInit {
   constructor(
     private dbService: DatabaseService,
     private http: HttpClient,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private vcRef: ViewContainerRef,
+    private zone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -49,31 +58,30 @@ export class MapComponent implements OnInit {
     });
   }
 
+  createTemplate(layer: L.Layer, data: Data): L.Content {
+    return this.zone.run(() => {
+      if (!this.popupTemplate) throw new Error('Popup template not found');
+
+      const view = this.vcRef?.createEmbeddedView(this.popupTemplate, { data });
+      const node = view?.rootNodes[0];
+
+      const destroy = () => {
+        view.destroy();
+        layer.off('popupclose', destroy);
+      };
+      layer.on('popupclose', destroy);
+
+      return node;
+    });
+  }
+
   addCircles() {
     const markers = this.data
-      .filter((e: Data) => e.lat && e.long)
-      .map((e: Data) =>
-        L.marker([+e.lat!, +e.long!], {
+      .filter((data: Data) => data.lat && data.long)
+      .map((data: Data) =>
+        L.marker([+data.lat!, +data.long!], {
           icon: this.defaultIconSettings,
-        }).bindPopup(
-          '<label><b>Nome:</b> ' +
-            e.bacia +
-            '</label><br>' +
-            '<b><label> Última coleta: </b>' +
-            e.update +
-            '<br>' +
-            e.data.map((i) => {
-              return (
-                '<br><label><b>' +
-                i.parametro_conforme_artigo +
-                ': </b> ' +
-                i.valor +
-                ' ' +
-                i.unidade +
-                '</label>'
-              );
-            })
-        )
+        }).bindPopup((layer) => this.createTemplate(layer, data))
       );
 
     this.layers?.push(...markers);
