@@ -81,15 +81,17 @@ export class MapComponent implements OnInit {
   }
 
   onMapReady(map: L.Map) {
-    this.http.get('assets/bacias.json').subscribe((baciasGeoJson: any) => {
-      const bacias = L.geoJSON(baciasGeoJson, {
-        style: {
-          color: 'blue',
-        },
-      });
+    this.http
+      .get('assets/bacias_simple.json')
+      .subscribe((baciasGeoJson: any) => {
+        const bacias = L.geoJSON(baciasGeoJson, {
+          style: {
+            color: 'blue',
+          },
+        });
 
-      this.layers?.push(bacias);
-      this.cdRef.markForCheck();
-    });
+        this.layers?.push(bacias);
+        this.cdRef.markForCheck();
+      });
   }
 }
