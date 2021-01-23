@@ -8,6 +8,7 @@ import {
 import * as L from 'leaflet';
 import { DatabaseService } from '../database.service';
 import { Data } from '../models/data.models';
+
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
@@ -54,16 +55,14 @@ export class MapComponent implements OnInit, AfterViewInit {
 
   addCircles() {
     var icon = new L.Icon.Default({
-      iconUrl: 'assets/marker-icon.png',
-      shadowUrl: 'assets/marker-shadow.png',
+      iconUrl: '',
+      shadowUrl: '',
+      shadowSize: [12, 10],
     });
 
-    icon.options.shadowSize = [12, 10];
     this.data.map((e: Data) => {
       if (e.lat && e.long) {
-        L.marker([+e.lat, +e.long], {
-          icon: icon,
-        })
+        L.marker([+e.lat, +e.long], { icon })
           .addTo(this.map)
           .bindPopup(
             '<label><b>Nome:</b> ' +
