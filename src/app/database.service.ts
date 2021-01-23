@@ -29,10 +29,8 @@ export class DatabaseService {
       })
     ).pipe(shareReplay());
 
-    const dbUrl = this.location.prepareExternalUrl('/assets/database.sqlite');
-
     const dbFile = this.http
-      .get(dbUrl, {
+      .get('/assets/database.sqlite', {
         responseType: 'arraybuffer',
         reportProgress: true,
         observe: 'events',

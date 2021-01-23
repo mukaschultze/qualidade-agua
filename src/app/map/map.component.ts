@@ -89,7 +89,7 @@ export class MapComponent implements OnInit {
       });
 
       this.layers?.push(bacias);
-      this.cdRef.detectChanges();
+      this.cdRef.markForCheck();
     });
   }
 }
