@@ -63,6 +63,11 @@ export class DatabaseService {
         return EMPTY;
       })
     );
+
+    this.db$.subscribe(() => {
+      this.dbDownloadProgress$.next(1.1);
+      this.dbDownloadProgress$.complete();
+    });
   }
 
   runSql(sql: string) {

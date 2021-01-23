@@ -34,9 +34,13 @@
   <mat-progress-bar
     [value]="progress * 100"
     [mode]="
-      progress < 0 ? 'query' : progress > 0 ? 'determinate' : 'indeterminate'
+      progress < 0
+        ? 'query'
+        : progress < 1 && progress > 0
+        ? 'determinate'
+        : 'indeterminate'
     "
-    *ngIf="progress < 1"
+    *ngIf="progress < 1.1"
   >
   </mat-progress-bar>
 </ng-template>
