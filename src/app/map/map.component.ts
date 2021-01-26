@@ -91,7 +91,9 @@ export class MapComponent implements OnInit {
 
   onMapReady(map: L.Map) {
     this.map = map;
-    this.map.invalidateSize();
+
+    setTimeout(() => this.map?.invalidateSize(), 500);
+
     this.http
       .get('assets/bacias_simple.json')
       .subscribe((baciasGeoJson: any) => {
