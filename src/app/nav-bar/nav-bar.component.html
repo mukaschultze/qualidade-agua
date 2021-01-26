@@ -19,6 +19,17 @@
       </mat-autocomplete>
     </mat-form-field>
   </form>
+
+  <div class="fill-remaining-space"></div>
+
+  <a
+    mat-button
+    href="https://github.com/mukaschultze/qualidade-agua"
+    target="_blank"
+  >
+    <img src="assets/github-circle-white-transparent.svg" class="logo" />
+    GitHub
+  </a>
 </mat-toolbar>
 
 <ng-container *ngIf="(dbDownloadProgress$ | async) != null">
