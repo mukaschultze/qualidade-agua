@@ -24,6 +24,7 @@ export class MapComponent implements OnInit {
 
   @ViewChild('popupTemplate', { static: true })
   private popupTemplate?: TemplateRef<any>;
+  private map?: L.Map;
 
   readonly options: L.MapOptions = {
     zoom: 7,
@@ -51,7 +52,7 @@ export class MapComponent implements OnInit {
     private zone: NgZone
   ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.dbService.getDados().subscribe((data) => {
       this.data = data;
       this.addCircles();
@@ -89,6 +90,8 @@ export class MapComponent implements OnInit {
   }
 
   onMapReady(map: L.Map) {
+    this.map = map;
+    this.map.invalidateSize();
     this.http
       .get('assets/bacias_simple.json')
       .subscribe((baciasGeoJson: any) => {
