@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/mukaschultze/qualidade-agua.svg?branch=master)](https://travis-ci.com/mukaschultze/qualidade-agua)
 
-Map com localizações e paramêtros de coletas de qualidade das águas das bacias hidrográficas do Rio Grande do Sul.
+Mapa com localizações e paramêtros de coletas de qualidade das águas das bacias hidrográficas do Rio Grande do Sul.
 
 Projeto para a disciplina de Sistemas Distribuídos da Universidade Federal de Santa Maria usando a base de dados de [@grintex/qualidade-agua](https://github.com/grintex/qualidade-agua).
 
