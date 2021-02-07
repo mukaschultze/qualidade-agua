@@ -99,7 +99,7 @@ export class MapComponent implements OnInit {
       .subscribe((baciasGeoJson: any) => {
         const bacias = L.geoJSON(baciasGeoJson, {
           style: {
-            color: 'blue',
+            color: 'orange',
           },
         });
 
