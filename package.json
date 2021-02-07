@@ -5,9 +5,11 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "simplify:bacias": "cat src/assets/bacias.json | simplify-geojson -t 0.01 > src/assets/bacias_simple.json"
   },
   "private": true,
   "dependencies": {
@@ -35,7 +37,7 @@
     "@angular/cli": "~11.0.5",
     "@angular/compiler-cli": "~11.0.5",
     "@types/jasmine": "~3.6.0",
-    "@types/leaflet": "^1.5.19",
+    "@types/leaflet": "^1.5.21",
     "@types/sql.js": "^1.0.3",
     "codelyzer": "^6.0.0",
     "jasmine-core": "~3.6.0",
@@ -46,6 +48,7 @@
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
     "protractor": "~7.0.0",
+    "simplify-geojson": "^1.0.4",
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
     "typescript": "~4.0.2"

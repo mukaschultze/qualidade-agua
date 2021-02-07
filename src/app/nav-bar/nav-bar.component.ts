@@ -7,20 +7,26 @@ import {
   startWith,
   switchMap,
 } from 'rxjs/operators';
+import { DatabaseService } from '../database.service';
 import { SearchService } from '../search.service';
 
 @Component({
-  selector: 'app-search-bar',
-  templateUrl: './search-bar.component.html',
-  styleUrls: ['./search-bar.component.scss'],
+  selector: 'app-nav-bar',
+  templateUrl: './nav-bar.component.html',
+  styleUrls: ['./nav-bar.component.scss'],
 })
 export class SearchBarComponent {
   myControl = new FormControl();
   filteredOptions$: Observable<string[]>;
 
   readonly MIN_SEARCH_LENGTH = 3;
+  readonly dbDownloadProgress$: Observable<number>;
 
-  constructor(private searchService: SearchService) {
+  constructor(
+    private searchService: SearchService,
+    private databaseService: DatabaseService
+  ) {
+    this.dbDownloadProgress$ = this.databaseService.dbDownloadProgress$;
     this.filteredOptions$ = this.myControl.valueChanges.pipe(
       startWith(''),
       debounceTime(200),

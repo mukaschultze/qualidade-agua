@@ -1,0 +1,57 @@
+<mat-toolbar color="primary">
+  <form class="form">
+    <mat-form-field class="full-width">
+      <input
+        type="text"
+        placeholder="Pesquisa"
+        aria-label="Pesquisa"
+        matInput
+        [formControl]="myControl"
+        [matAutocomplete]="auto"
+      />
+      <mat-autocomplete #auto="matAutocomplete">
+        <mat-option
+          *ngFor="let option of filteredOptions$ | async"
+          [value]="option"
+        >
+          {{ option }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </form>
+
+  <div class="fill-remaining-space"></div>
+
+  <a
+    mat-button
+    href="https://github.com/mukaschultze/qualidade-agua"
+    target="_blank"
+  >
+    <img src="assets/github-circle-white-transparent.svg" class="logo" />
+    GitHub
+  </a>
+</mat-toolbar>
+
+<ng-container *ngIf="(dbDownloadProgress$ | async) != null">
+  <ng-container
+    *ngTemplateOutlet="
+      loadingTemplate;
+      context: { progress: dbDownloadProgress$ | async }
+    "
+  ></ng-container>
+</ng-container>
+
+<ng-template let-progress="progress" #loadingTemplate>
+  <mat-progress-bar
+    [value]="progress * 100"
+    [mode]="
+      progress < 0
+        ? 'query'
+        : progress < 1 && progress > 0
+        ? 'determinate'
+        : 'indeterminate'
+    "
+    *ngIf="progress < 1.1"
+  >
+  </mat-progress-bar>
+</ng-template>

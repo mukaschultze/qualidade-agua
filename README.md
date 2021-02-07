@@ -1,27 +1,12 @@
-# QualidadeAgua
+# [Qualidade das Águas - Rio Grande do Sul - Brasil](https://mukaschultze.github.io/qualidade-agua/)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.0.5.
+[![Build Status](https://travis-ci.com/mukaschultze/qualidade-agua.svg?branch=master)](https://travis-ci.com/mukaschultze/qualidade-agua)
 
-## Development server
+Mapa com localizações e paramêtros de coletas de qualidade das águas das bacias hidrográficas do Rio Grande do Sul.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Projeto para a disciplina de Sistemas Distribuídos da Universidade Federal de Santa Maria usando a base de dados de [@grintex/qualidade-agua](https://github.com/grintex/qualidade-agua).
 
-## Code scaffolding
+## Desenvolvedores
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+| [<img src="https://github.com/mukaschultze.png?size=115" width=115><br><sub>@mukaschultze</sub>](https://github.com/mukaschultze) | [<img src="https://github.com/gsajulia.png?size=115" width=115><br><sub>@gsajulia</sub>](https://github.com/gsajulia) | [<img src="https://github.com/gustavokessler.png?size=115" width=115><br><sub>@gustavokessler</sub>](https://github.com/gustavokessler) |
+| :-------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------: | --------------------------------------------------------------------------------------------------------------------------------------- |
