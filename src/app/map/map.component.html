@@ -4,12 +4,15 @@
   [leafletOptions]="options"
   (leafletMapReady)="onMapReady($event)"
 >
+  <ng-container *ngIf="bacias" [leafletLayer]="bacias"></ng-container>
+  <ng-container [leafletLayer]="mapLayer"></ng-container>
   <ng-container *ngFor="let l of layers" [leafletLayer]="l"></ng-container>
 </div>
 
 <ng-template let-data="data" #popupTemplate>
   <ul>
-    <li><b>Nome:</b> {{ data.bacia }}</li>
+    <li *ngIf="data.bacia"><b>Bacia:</b> {{ data.bacia }}</li>
+    <li *ngIf="data.municipio" ><b>Município:</b> {{ data.municipio }}</li>
     <li><b> Última coleta:</b> {{ data.update }}</li>
     <li *ngFor="let parametro of data.data">
       <b>{{ parametro.parametro_conforme_artigo }}</b>

@@ -10,8 +10,10 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import * as L from 'leaflet';
+import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { DatabaseService } from '../database.service';
 import { Data } from '../models/data.models';
+import { SearchService } from '../search.service';
 
 @Component({
   selector: 'app-map',
@@ -22,6 +24,13 @@ import { Data } from '../models/data.models';
 export class MapComponent implements OnInit {
   data: Array<Data> = [];
 
+  bacias?: L.Layer;
+  mapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution:
+      '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  });
+
   @ViewChild('popupTemplate', { static: true })
   private popupTemplate?: TemplateRef<any>;
   private map?: L.Map;
@@ -31,12 +40,7 @@ export class MapComponent implements OnInit {
     center: [-30, -53],
   };
 
-  readonly layers: L.Layer[] = [
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution:
-        '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }),
+  layers: L.Layer[] = [
   ];
 
   readonly defaultIconSettings = new L.Icon.Default({
@@ -49,14 +53,25 @@ export class MapComponent implements OnInit {
     private http: HttpClient,
     private cdRef: ChangeDetectorRef,
     private vcRef: ViewContainerRef,
-    private zone: NgZone
+    private zone: NgZone,
+    private pesquisaService: SearchService 
   ) {}
 
   ngOnInit() {
-    this.dbService.getDados().subscribe((data) => {
-      this.data = data;
+    this.dbService.getDados().pipe(
+      switchMap(data=> this.pesquisaService.pesquisa$.pipe(map(pesquisa=> [data, pesquisa] as const))),
+      map(([res, pesquisa]) => !pesquisa ? res :  res.filter((e) => {
+        if (typeof e.municipio === "string" &&  e.municipio.toLocaleUpperCase().includes(pesquisa.toLocaleUpperCase()))
+          return true;
+        if (typeof e.bacia === "string" &&  e.bacia.toLocaleUpperCase().includes(pesquisa.toLocaleUpperCase()))
+          return true;
+        return false;
+        }))
+    ).subscribe((data) => {
+      this.data = data
       this.addCircles();
     });
+
   }
 
   createTemplate(layer: L.Layer, data: Data): L.Content {
@@ -85,7 +100,7 @@ export class MapComponent implements OnInit {
         }).bindPopup((layer) => this.createTemplate(layer, data))
       );
 
-    this.layers?.push(...markers);
+    this.layers = markers;
     this.cdRef.markForCheck();
   }
 
@@ -103,7 +118,7 @@ export class MapComponent implements OnInit {
           },
         });
 
-        this.layers?.push(bacias);
+        this.bacias = bacias;
         this.cdRef.markForCheck();
       });
   }

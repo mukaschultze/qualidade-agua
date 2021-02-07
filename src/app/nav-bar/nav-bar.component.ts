@@ -3,11 +3,13 @@ import { FormControl } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import {
   debounceTime,
+  mapTo,
   shareReplay,
   startWith,
   switchMap,
 } from 'rxjs/operators';
 import { DatabaseService } from '../database.service';
+import { Data } from '../models/data.models';
 import { SearchService } from '../search.service';
 
 @Component({
@@ -17,7 +19,7 @@ import { SearchService } from '../search.service';
 })
 export class SearchBarComponent {
   myControl = new FormControl();
-  filteredOptions$: Observable<string[]>;
+  filteredOptions$: Observable<Data[]>;
 
   readonly MIN_SEARCH_LENGTH = 3;
   readonly dbDownloadProgress$: Observable<number>;
@@ -32,10 +34,15 @@ export class SearchBarComponent {
       debounceTime(200),
       switchMap((search: string) =>
         search.length <= this.MIN_SEARCH_LENGTH
-          ? of([])
+          ? this.searchService.search("").pipe(mapTo([]))
           : this.searchService.search(search)
       ),
       shareReplay()
     );
   }
+
+  filter(selected: Data){
+    
+  }
+
 }
